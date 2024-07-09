@@ -39,7 +39,7 @@ export function start() {
   );
   if (window.matchMedia("(min-width: 768px)").matches) {
     const carousel = new bootstrap.Carousel(multipleCardCarousel, {
-      interval: false
+      interval: false,
     });
     const carouselWidth = $(".carousel-inner")[0].scrollWidth;
     const cardWidth = $(".carousel-item").width();
@@ -74,3 +74,38 @@ export function start() {
     $(multipleCardCarousel).addClass("slide");
   }
 }
+
+// favorites
+
+import axios from "axios";
+
+// Function to retrieve all favorite images from the Cat API
+const getFavourites = async () => {
+  try {
+    const response = await axios.get("https://api.thecatapi.com/v1/favourites");
+    const favoriteImages = response.data.map((favorite) => favorite.image);
+
+    const carouselInner = document.getElementById("carouselInner");
+    carouselInner.innerHTML = ""; // Clear carousel
+
+  
+    favoriteImages.forEach((image) => {
+      const carouselItem = document.createElement("div");
+      carouselItem.classList.add("carousel-item");
+
+      const card = document.createElement("div");
+      card.classList.add("card");
+
+      card.innerHTML = `<img src="${image.url}" alt="Favorite Cat Image">`;
+
+      carouselItem.appendChild(card);
+      carouselInner.appendChild(carouselItem);
+    });
+  } catch (error) {
+    console.error("Error getting favorites:", error);
+  }
+};
+
+document
+  .getElementById("getFavouritesBtn")
+  .addEventListener("click", getFavourites);

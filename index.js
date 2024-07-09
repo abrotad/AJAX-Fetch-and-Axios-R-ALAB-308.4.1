@@ -1,4 +1,6 @@
-import * as Carousel from "./Carousel.js";
+// import * as Carousel from "./Carousel.js";
+const Carousel = require("./carousel.js");
+
 import axios from "axios";
 
 // The breed selection input element.
@@ -11,7 +13,8 @@ const progressBar = document.getElementById("progressBar");
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "";
+const API_KEY =
+  "live_doefnFzRPFiKnjbJQzljjanV2sv7bUhmoXL0J31YnIRQPYla6Vg8dICOSR3kDhua";
 
 /**
  * 1. Create an async function "initialLoad" that does the following:
@@ -21,6 +24,24 @@ const API_KEY = "";
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
+
+async function initialLoad() {
+  const response = await fetch("https://api.thecatapi.com/v1/breeds");
+  const breeds = await response.json();
+
+  const breedSelect = document.getElementById("breedSelect");
+
+  breeds.forEach((breed) => {
+    const option = document.createElement("option");
+    option.value = breed.id;
+    option.text = breed.name;
+    breedSelect.appendChild(option);
+  });
+}
+
+initialLoad();
+
+// .................................................
 
 /**
  * 2. Create an event handler for breedSelect that does the following:
@@ -36,6 +57,56 @@ const API_KEY = "";
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+// Event handler for breedSelect
+
+document
+  .getElementById("breedSelect")
+  .addEventListener("change", async function () {
+    const breedId = this.value;
+    const response = await fetch(
+      `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`
+    );
+    const data = await response.json();
+
+    const carouselInner = document.getElementById("carouselInner");
+    carouselInner.innerHTML = ""; // Clear carousel
+
+    const infoDump = document.getElementById("infoDump");
+    infoDump.innerHTML = ""; // Clear infoDump
+
+    data.forEach((item) => {
+      const carouselItem = document.createElement("div");
+      carouselItem.classList.add("carousel-item");
+
+      const card = document.createElement("div");
+      card.classList.add("card");
+
+      const imgWrapper = document.createElement("div");
+      imgWrapper.classList.add("img-wrapper");
+
+      const img = document.createElement("img");
+      img.src = item.url;
+      img.classList.add("d-block", "w-100");
+      img.alt = "Cat Image";
+
+      imgWrapper.appendChild(img);
+      card.appendChild(imgWrapper);
+      carouselItem.appendChild(card);
+      carouselInner.appendChild(carouselItem);
+
+      const info = document.createElement("p");
+      info.textContent = `Breed: ${item.breeds[0].name}, Origin: ${item.breeds[0].origin}, Description: ${item.breeds[0].description}`;
+      infoDump.appendChild(info);
+    });
+
+    // Restart the carousel
+    $("#carouselExampleControls").carousel("cycle");
+  });
+
+// Adding a call to the event handler function after the initialLoad function.
+initialLoad();
+
+// ...................................................
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
